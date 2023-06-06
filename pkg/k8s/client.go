@@ -1,6 +1,10 @@
 package k8s
 
 import (
+	"context"
+	"os"
+	"path/filepath"
+
 	"go.uber.org/zap"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -9,8 +13,6 @@ import (
 	"k8s.io/client-go/rest"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"os"
-	"path/filepath"
 )
 
 type ClientInterface interface {
@@ -25,11 +27,11 @@ type Client struct {
 }
 
 func (c *Client) GetPods(namespace string, options metav1.ListOptions) (*apiv1.PodList, error) {
-	return c.clientSet.CoreV1().Pods(namespace).List(options)
+	return c.clientSet.CoreV1().Pods(namespace).List(context.Background(), options)
 }
 
 func (c *Client) DeletePod(pod *apiv1.Pod) error {
-	return c.clientSet.CoreV1().Pods(pod.ObjectMeta.Namespace).Delete(pod.ObjectMeta.Name, &metav1.DeleteOptions{})
+	return c.clientSet.CoreV1().Pods(pod.ObjectMeta.Namespace).Delete(context.Background(), pod.ObjectMeta.Name, metav1.DeleteOptions{})
 }
 
 func (c *Client) NewSharedInformerFactory(ns string) (informers.SharedInformerFactory, error) {
